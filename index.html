@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Kinetic Court</title>
+<title>Feather Net Social Club</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -148,6 +148,28 @@
       </div>
     </div>
 
+    <!-- Court count selector -->
+    <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30">
+      <p class="text-on-surface-variant text-xs font-bold tracking-widest uppercase mb-3">Number of Courts</p>
+      <div class="grid grid-cols-3 gap-2" id="court-selector">
+        <button onclick="selectCourts(1)" id="court-btn-1"
+          class="court-btn py-3 rounded-xl border-2 font-headline font-bold text-sm flex flex-col items-center gap-1 transition-all active:scale-95 border-outline-variant/40 text-on-surface-variant bg-surface-container-low">
+          <span class="material-symbols-outlined text-xl">sports_tennis</span>
+          <span>1 Court</span>
+        </button>
+        <button onclick="selectCourts(2)" id="court-btn-2"
+          class="court-btn py-3 rounded-xl border-2 font-headline font-bold text-sm flex flex-col items-center gap-1 transition-all active:scale-95 border-primary bg-primary/10 text-primary">
+          <span class="material-symbols-outlined text-xl">sports_tennis</span>
+          <span>2 Courts</span>
+        </button>
+        <button onclick="selectCourts(3)" id="court-btn-3"
+          class="court-btn py-3 rounded-xl border-2 font-headline font-bold text-sm flex flex-col items-center gap-1 transition-all active:scale-95 border-outline-variant/40 text-on-surface-variant bg-surface-container-low">
+          <span class="material-symbols-outlined text-xl">sports_tennis</span>
+          <span>3 Courts</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Input grid -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-primary/20">
@@ -234,6 +256,7 @@ const state = {
     { id:2, label:'Court 2', match:null },
     { id:3, label:'Court 3', match:null },
   ],
+  courtCount: 2,
   nextId: 1,
   started: false,
   activeTab: 'courts',
@@ -304,12 +327,26 @@ function parseLine(raw, gender) {
 // ═══════════════════════════════════════
 //  ACTIONS
 // ═══════════════════════════════════════
+function selectCourts(n) {
+  state.courtCount = n;
+  [1,2,3].forEach(i => {
+    const btn = document.getElementById('court-btn-'+i);
+    if (i === n) {
+      btn.className = 'court-btn py-3 rounded-xl border-2 font-headline font-bold text-sm flex flex-col items-center gap-1 transition-all active:scale-95 border-primary bg-primary/10 text-primary';
+    } else {
+      btn.className = 'court-btn py-3 rounded-xl border-2 font-headline font-bold text-sm flex flex-col items-center gap-1 transition-all active:scale-95 border-outline-variant/40 text-on-surface-variant bg-surface-container-low';
+    }
+  });
+}
+
 function startSession() {
   const bv=document.getElementById('boys-ta').value;
   const gv=document.getElementById('girls-ta').value;
   if(!bv.trim()&&!gv.trim()) return;
   bv.split(/[\n,]+/).forEach(l=>{const p=parseLine(l,'boy');if(p)state.players.push(p);});
   gv.split(/[\n,]+/).forEach(l=>{const p=parseLine(l,'girl');if(p)state.players.push(p);});
+  // Build courts array from selected count
+  state.courts = Array.from({length: state.courtCount}, (_,i) => ({ id:i+1, label:`Court ${i+1}`, match:null }));
   state.started=true;
   state.courts.forEach(c=>fillCourt(c));
   render();
@@ -334,7 +371,7 @@ function removePlayer(id) {
 
 function resetSession() {
   if(!confirm('End session and clear all data?')) return;
-  state.players=[];state.courts.forEach(c=>c.match=null);
+  state.players=[];state.courts=Array.from({length:state.courtCount},(_,i)=>({id:i+1,label:`Court ${i+1}`,match:null}));
   state.started=false;state.nextId=1;state.activeTab='courts';
   render();
 }
