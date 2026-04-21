@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Kinetic Court</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "secondary-fixed": "#3fff8b",
+          "inverse-surface": "#08082f",
+          "on-secondary-fixed": "#004820",
+          "tertiary-fixed": "#ff909e",
+          "inverse-primary": "#6889ff",
+          "on-tertiary-fixed-variant": "#780026",
+          "error": "#b41340",
+          "surface-container-highest": "#dbd9ff",
+          "surface-container": "#e8e6ff",
+          "on-secondary-container": "#005d2c",
+          "secondary": "#006a33",
+          "tertiary-dim": "#a20036",
+          "outline": "#72739e",
+          "primary": "#004be2",
+          "on-secondary": "#cdffd3",
+          "primary-fixed-dim": "#6c8cff",
+          "on-primary-fixed-variant": "#002376",
+          "surface-container-high": "#e1e0ff",
+          "tertiary-container": "#ff909e",
+          "primary-fixed": "#809bff",
+          "error-dim": "#a70138",
+          "on-error": "#ffefef",
+          "surface-variant": "#dbd9ff",
+          "on-tertiary-container": "#670020",
+          "on-surface-variant": "#575881",
+          "on-secondary-fixed-variant": "#006832",
+          "primary-dim": "#0041c7",
+          "on-primary-container": "#001b61",
+          "surface-tint": "#004be2",
+          "on-primary-fixed": "#000000",
+          "on-error-container": "#510017",
+          "surface-bright": "#f8f5ff",
+          "surface-container-low": "#f2efff",
+          "surface": "#f8f5ff",
+          "secondary-container": "#3fff8b",
+          "surface-dim": "#d1d0ff",
+          "secondary-fixed-dim": "#24f07e",
+          "on-primary": "#f2f1ff",
+          "tertiary": "#b8003f",
+          "error-container": "#f74b6d",
+          "primary-container": "#809bff",
+          "on-tertiary-fixed": "#39000e",
+          "background": "#f8f5ff",
+          "on-surface": "#2a2b51",
+          "secondary-dim": "#005c2b",
+          "outline-variant": "#a9a9d7",
+          "on-tertiary": "#ffefef",
+          "on-background": "#2a2b51",
+          "tertiary-fixed-dim": "#ff788c",
+          "surface-container-lowest": "#ffffff",
+          "inverse-on-surface": "#9999c6"
+        },
+        borderRadius: {
+          "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"
+        },
+        fontFamily: {
+          "headline": ["Space Grotesk"],
+          "body": ["Plus Jakarta Sans"],
+          "label": ["Plus Jakarta Sans"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    line-height: 1;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    user-select: none;
+  }
+  .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .tap-highlight-transparent { -webkit-tap-highlight-color: transparent; }
+  body { min-height: max(884px, 100dvh); }
+  .page { display: none; }
+  .page.active { display: block; }
+  /* skill badge colours */
+  .sk-beg { background: #eff6ff; color: #004be2; }
+  .sk-int { background: #3fff8b33; color: #006a33; }
+  .sk-adv { background: #fff0f2; color: #b8003f; }
+</style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen pb-32 tap-highlight-transparent">
+
+<!-- ══════════════════ TOP APP BAR ══════════════════ -->
+<header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm shadow-blue-900/5 flex justify-between items-center px-5 py-4 w-full">
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined text-2xl text-primary">sports_tennis</span>
+    <h1 class="text-2xl font-black text-primary uppercase tracking-tighter font-headline">Kinetic Court</h1>
+  </div>
+  <div id="live-pill" class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold font-headline tracking-widest items-center gap-1 hidden">
+    <span class="relative flex h-2 w-2">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+    </span>
+    <span id="live-count">0</span> LIVE
+  </div>
+  <button id="reset-btn" onclick="resetSession()" class="hidden items-center gap-1 text-tertiary border border-tertiary/40 rounded-full px-3 py-1 text-xs font-bold font-headline tracking-wider hover:bg-tertiary/10 active:scale-95 transition-all">
+    <span class="material-symbols-outlined text-sm">refresh</span> Reset
+  </button>
+</header>
+
+<!-- ══════════════════ PAGES ══════════════════ -->
+<main class="px-4 pt-6 max-w-2xl mx-auto">
+
+  <!-- ── SETUP PAGE ── -->
+  <div id="setup-page" class="page active space-y-4">
+    <!-- Hero -->
+    <div class="bg-primary rounded-2xl p-5 text-on-primary shadow-lg shadow-primary/20">
+      <p class="text-on-primary/70 text-xs font-bold tracking-widest uppercase mb-1">Welcome</p>
+      <h2 class="font-headline text-3xl font-bold leading-tight">Start a Session</h2>
+      <p class="text-on-primary/70 text-sm mt-1">Add players with skill level. Courts fill automatically.</p>
+    </div>
+
+    <!-- Skill legend -->
+    <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30">
+      <p class="text-on-surface-variant text-xs font-bold tracking-widest uppercase mb-3">Skill Levels</p>
+      <div class="flex gap-2 flex-wrap">
+        <span class="sk-beg text-xs font-black px-3 py-1 rounded-full">1 — Beginner</span>
+        <span class="sk-int text-xs font-black px-3 py-1 rounded-full">2 — Intermediate</span>
+        <span class="sk-adv text-xs font-black px-3 py-1 rounded-full">3 — Advanced</span>
+      </div>
+      <div class="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-amber-800 text-xs leading-relaxed">
+        One player per line. Add skill after name:<br/>
+        <span class="font-black">Alex 2 &nbsp;·&nbsp; Priya 3 &nbsp;·&nbsp; Sam</span> (no number = Beginner)
+      </div>
+    </div>
+
+    <!-- Input grid -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-primary/20">
+        <label class="text-primary text-xs font-black tracking-wider uppercase flex items-center gap-1 mb-2" for="boys-ta">
+          <span class="material-symbols-outlined fill-icon text-base">male</span> Boys
+        </label>
+        <textarea id="boys-ta" class="w-full bg-surface-container-low rounded-lg border-0 text-on-surface text-sm p-2 resize-none h-32 focus:ring-2 focus:ring-primary/40 font-body" placeholder="Alex 2&#10;Jordan 1&#10;Marcus 3&#10;Sam 2"></textarea>
+      </div>
+      <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-tertiary/20">
+        <label class="text-tertiary text-xs font-black tracking-wider uppercase flex items-center gap-1 mb-2" for="girls-ta">
+          <span class="material-symbols-outlined fill-icon text-base">female</span> Girls
+        </label>
+        <textarea id="girls-ta" class="w-full bg-surface-container-low rounded-lg border-0 text-on-surface text-sm p-2 resize-none h-32 focus:ring-2 focus:ring-tertiary/40 font-body" placeholder="Priya 2&#10;Mei 3&#10;Lily 1&#10;Jess 2"></textarea>
+      </div>
+    </div>
+
+    <button onclick="startSession()" class="w-full py-4 rounded-xl bg-primary text-on-primary font-headline font-bold text-lg tracking-wide shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined">sports_tennis</span>
+      Start Session
+    </button>
+  </div>
+
+  <!-- ── COURTS PAGE ── -->
+  <div id="courts-page" class="page space-y-4">
+    <!-- Header -->
+    <div class="flex justify-between items-end mb-2">
+      <div>
+        <p class="text-on-surface-variant text-xs font-bold tracking-widest uppercase mb-1">Live Play</p>
+        <h2 class="text-3xl font-headline font-bold text-on-surface leading-none">Courts</h2>
+      </div>
+      <div id="stats-courts" class="text-right"></div>
+    </div>
+    <div id="courts-list"></div>
+    <button onclick="resetSession()" class="w-full py-4 rounded-xl font-headline font-bold text-tertiary bg-tertiary/10 border-2 border-dashed border-tertiary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4">
+      <span class="material-symbols-outlined">logout</span> End Session
+    </button>
+  </div>
+
+  <!-- ── QUEUE PAGE ── -->
+  <div id="queue-page" class="page">
+    <!-- Header -->
+    <div class="flex justify-between items-end mb-6">
+      <div>
+        <p class="text-on-surface-variant text-xs font-bold tracking-widest uppercase mb-1">Queue Status</p>
+        <h2 class="text-3xl font-headline font-bold text-on-surface leading-none">Next Up</h2>
+      </div>
+      <div class="text-right">
+        <span id="waiting-count" class="text-primary font-headline text-3xl font-bold">0</span>
+        <p class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">Waiting</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 px-1 mb-3 text-on-surface-variant/60 text-[11px] font-bold uppercase tracking-widest">
+      <span class="material-symbols-outlined text-sm">touch_app</span>
+      Tap a player to remove from queue
+    </div>
+    <div id="queue-list" class="space-y-3"></div>
+    <button onclick="resetSession()" class="w-full mt-8 py-4 rounded-xl font-headline font-bold text-tertiary bg-tertiary/10 border-2 border-dashed border-tertiary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined">logout</span> End Session
+    </button>
+  </div>
+
+</main>
+
+<!-- ══════════════════ BOTTOM NAV ══════════════════ -->
+<nav id="bottom-nav" class="hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 backdrop-blur-xl z-50 rounded-t-[32px] shadow-[0_-8px_30px_rgb(0,0,0,0.06)] tap-highlight-transparent">
+  <button onclick="switchTab('courts')" id="nav-courts" class="flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-all text-slate-400">
+    <span class="material-symbols-outlined text-2xl">grid_view</span>
+    <span class="font-label text-[11px] font-semibold mt-0.5">Courts</span>
+  </button>
+  <button onclick="switchTab('queue')" id="nav-queue" class="flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-all text-slate-400">
+    <span class="material-symbols-outlined text-2xl">hourglass_empty</span>
+    <span class="font-label text-[11px] font-semibold mt-0.5">Queue</span>
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+const state = {
+  players: [],
+  courts: [
+    { id:1, label:'Court 1', match:null },
+    { id:2, label:'Court 2', match:null },
+    { id:3, label:'Court 3', match:null },
+  ],
+  nextId: 1,
+  started: false,
+  activeTab: 'courts',
+};
+
+// ═══════════════════════════════════════
+//  LOGIC
+// ═══════════════════════════════════════
+function bestMixedMatch(bQ, gQ) {
+  if (bQ.length < 2 || gQ.length < 2) return null;
+  const bC = bQ.slice(0,6), gC = gQ.slice(0,6);
+  let best = null, bestScore = Infinity;
+  for (let b1=0;b1<bC.length;b1++) for (let b2=b1+1;b2<bC.length;b2++)
+  for (let g1=0;g1<gC.length;g1++) for (let g2=g1+1;g2<gC.length;g2++) {
+    const boys=[bC[b1],bC[b2]], girls=[gC[g1],gC[g2]];
+    for (const [tA,tB] of [[[boys[0],girls[0]],[boys[1],girls[1]]],[[boys[0],girls[1]],[boys[1],girls[0]]]]) {
+      const diff=Math.abs(tA.reduce((s,p)=>s+p.skill,0)-tB.reduce((s,p)=>s+p.skill,0));
+      const qCost=[...tA,...tB].reduce((s,p)=>s+p.qRank,0)*0.3;
+      if(diff*10+qCost<bestScore){bestScore=diff*10+qCost;best={teamA:tA,teamB:tB,type:'mixed',skillDiff:diff};}
+    }
+  }
+  return best;
+}
+
+function bestOpenMatch(avail) {
+  if (avail.length < 4) return null;
+  const four = avail.slice(0,4);
+  let best=null, bd=Infinity;
+  for (const [tA,tB] of [[[four[0],four[1]],[four[2],four[3]]],[[four[0],four[2]],[four[1],four[3]]],[[four[0],four[3]],[four[1],four[2]]]]) {
+    const diff=Math.abs(tA.reduce((s,p)=>s+p.skill,0)-tB.reduce((s,p)=>s+p.skill,0));
+    if(diff<bd){bd=diff;best={teamA:tA,teamB:tB,type:'open',skillDiff:diff};}
+  }
+  return best;
+}
+
+function getQueue() {
+  return state.players.filter(p=>!p.onCourt).sort((a,b)=>a.games-b.games||a.id-b.id);
+}
+
+function fillCourt(court) {
+  const queue = getQueue();
+  if (queue.length < 4) return;
+  const wR = queue.map((p,i)=>({...p,qRank:i}));
+  const top10 = wR.slice(0,10);
+  const b10 = top10.filter(p=>p.gender==='boy');
+  const g10 = top10.filter(p=>p.gender==='girl');
+  let match = (b10.length>=2&&g10.length>=2) ? bestMixedMatch(b10,g10) : null;
+  if (!match) match = bestOpenMatch(wR);
+  if (match) {
+    [...match.teamA,...match.teamB].forEach(p=>{
+      const pl=state.players.find(x=>x.id===p.id);
+      if(pl) pl.onCourt=court.id;
+    });
+    court.match = match;
+  }
+}
+
+function parseLine(raw, gender) {
+  const line = raw.trim();
+  if (!line) return null;
+  const m = line.match(/\b([123])\s*$/);
+  let skill=1, name=line;
+  if(m){skill=parseInt(m[1]);name=line.slice(0,m.index).trim().replace(/[,\s]+$/,'');}
+  if(!name) return null;
+  return {id:state.nextId++,name,gender,skill,games:0,onCourt:null};
+}
+
+// ═══════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════
+function startSession() {
+  const bv=document.getElementById('boys-ta').value;
+  const gv=document.getElementById('girls-ta').value;
+  if(!bv.trim()&&!gv.trim()) return;
+  bv.split(/[\n,]+/).forEach(l=>{const p=parseLine(l,'boy');if(p)state.players.push(p);});
+  gv.split(/[\n,]+/).forEach(l=>{const p=parseLine(l,'girl');if(p)state.players.push(p);});
+  state.started=true;
+  state.courts.forEach(c=>fillCourt(c));
+  render();
+}
+
+function finishMatch(courtId) {
+  const court=state.courts.find(c=>c.id===courtId);
+  if(!court?.match) return;
+  [...court.match.teamA,...court.match.teamB].forEach(p=>{
+    const pl=state.players.find(x=>x.id===p.id);
+    if(pl){pl.games++;pl.onCourt=null;}
+  });
+  court.match=null;
+  fillCourt(court);
+  render();
+}
+
+function removePlayer(id) {
+  state.players=state.players.filter(p=>p.id!==id);
+  render();
+}
+
+function resetSession() {
+  if(!confirm('End session and clear all data?')) return;
+  state.players=[];state.courts.forEach(c=>c.match=null);
+  state.started=false;state.nextId=1;state.activeTab='courts';
+  render();
+}
+
+function switchTab(tab) {
+  state.activeTab=tab;
+  render();
+}
+
+// ═══════════════════════════════════════
+//  RENDER HELPERS
+// ═══════════════════════════════════════
+const SKILL_LABEL=['','BEG','INT','ADV'];
+
+function skillBadge(s) {
+  const cls = s===1?'sk-beg':s===2?'sk-int':'sk-adv';
+  return `<span class="${cls} text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">${SKILL_LABEL[s]}</span>`;
+}
+
+function playerRowHTML(p) {
+  const isBoy = p.gender==='boy';
+  const bg    = isBoy ? 'bg-blue-50 border-blue-100' : 'bg-pink-50 border-pink-100';
+  const icon  = isBoy ? 'male' : 'female';
+  const iColor= isBoy ? 'text-primary' : 'text-tertiary';
+  return `
+    <div class="flex items-center gap-3 ${bg} border rounded-xl px-3 py-2">
+      <span class="material-symbols-outlined fill-icon text-base ${iColor}">${icon}</span>
+      <span class="font-bold text-on-surface text-sm flex-1">${p.name}</span>
+      ${skillBadge(p.skill)}
+    </div>`;
+}
+
+function courtCardHTML(court) {
+  const m = court.match;
+  if (!m) return `
+    <div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/20">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-on-surface-variant">sports_tennis</span>
+          <span class="font-headline font-bold text-on-surface">${court.label}</span>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 border border-outline-variant/40 rounded-full px-3 py-1">Vacant</span>
+      </div>
+      <div class="text-center text-on-surface-variant/50 text-sm font-semibold py-5">
+        <span class="material-symbols-outlined text-3xl block mb-1 opacity-30">hourglass_empty</span>
+        Waiting for players…
+      </div>
+    </div>`;
+
+  const tAS=m.teamA.reduce((s,p)=>s+p.skill,0);
+  const tBS=m.teamB.reduce((s,p)=>s+p.skill,0);
+  const balPct=Math.max(0,Math.round(100-Math.abs(tAS-tBS)*25));
+
+  const isMixed = m.type==='mixed';
+  const badgeBg  = isMixed ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-primary/10 text-primary border-primary/20';
+  const badgeTxt = isMixed ? '⚡ Mixed' : '🔵 Open';
+
+  // balance bar colour
+  const barColor = balPct>=80?'bg-secondary':balPct>=50?'bg-amber-400':'bg-tertiary';
+
+  return `
+    <div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-outline-variant/20">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">sports_tennis</span>
+          <span class="font-headline font-bold text-on-surface">${court.label}</span>
+        </div>
+        <span class="text-[10px] font-bold uppercase tracking-widest border rounded-full px-3 py-1 ${badgeBg}">${badgeTxt}</span>
+      </div>
+      <div class="space-y-1.5">${m.teamA.map(playerRowHTML).join('')}</div>
+      <div class="flex items-center gap-2 my-3">
+        <div class="flex-1 h-px bg-outline-variant/30"></div>
+        <span class="text-[10px] font-black text-on-surface-variant/40 tracking-widest">VS</span>
+        <div class="flex-1 h-px bg-outline-variant/30"></div>
+      </div>
+      <div class="space-y-1.5">${m.teamB.map(playerRowHTML).join('')}</div>
+      <!-- Balance -->
+      <div class="flex items-center gap-2 mt-3 pt-3 border-t border-outline-variant/20">
+        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Skill Balance</span>
+        <div class="flex-1 bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+          <div class="${barColor} h-full rounded-full transition-all" style="width:${balPct}%"></div>
+        </div>
+        <span class="text-[10px] font-black text-secondary">${balPct}%</span>
+      </div>
+      <button onclick="finishMatch(${court.id})" class="mt-3 w-full py-3 rounded-xl bg-secondary/10 text-secondary border border-secondary/20 font-headline font-bold text-sm tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-base">check_circle</span> Match Finished
+      </button>
+    </div>`;
+}
+
+function queueItemHTML(p, i) {
+  const isBoy = p.gender==='boy';
+  const icon  = isBoy ? 'male' : 'female';
+  const iColor= isBoy ? 'text-primary' : 'text-tertiary';
+  const numBg = i===0 ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-on-surface-variant';
+  return `
+    <div onclick="removePlayer(${p.id})"
+         class="group relative bg-surface-container-lowest rounded-xl p-4 flex items-center justify-between shadow-sm active:shadow-md active:bg-red-50 active:border-red-200 border border-outline-variant/20 cursor-pointer transition-all active:scale-[0.98]">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full ${numBg} flex items-center justify-center font-headline font-bold text-sm flex-shrink-0">${i+1}</div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined fill-icon text-sm ${iColor}">${icon}</span>
+            <span class="font-bold text-on-surface text-base">${p.name}</span>
+          </div>
+          <div class="flex items-center gap-2 mt-1">
+            ${skillBadge(p.skill)}
+            <span class="text-on-surface-variant text-xs font-semibold">${p.games}g played</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-1">
+        <span class="group-active:hidden text-on-surface-variant text-[10px] font-bold uppercase">Games</span>
+        <span class="group-active:hidden font-headline font-bold text-on-surface">${p.games}</span>
+        <span class="hidden group-active:flex items-center gap-1 text-red-600 text-xs font-bold bg-red-100 border border-red-200 rounded-full px-2 py-0.5">
+          <span class="material-symbols-outlined text-sm">person_remove</span> Remove
+        </span>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+//  MAIN RENDER
+// ═══════════════════════════════════════
+function render() {
+  const setupPage  = document.getElementById('setup-page');
+  const courtsPage = document.getElementById('courts-page');
+  const queuePage  = document.getElementById('queue-page');
+  const bottomNav  = document.getElementById('bottom-nav');
+  const livePill   = document.getElementById('live-pill');
+  const resetBtn   = document.getElementById('reset-btn');
+
+  if (!state.started) {
+    setupPage.classList.add('active');
+    courtsPage.classList.remove('active');
+    queuePage.classList.remove('active');
+    bottomNav.classList.add('hidden');    bottomNav.classList.remove('flex');
+    livePill.classList.add('hidden');     livePill.classList.remove('flex');
+    resetBtn.classList.add('hidden');     resetBtn.classList.remove('flex');
+    return;
+  }
+
+  // Session active
+  setupPage.classList.remove('active');
+  bottomNav.classList.remove('hidden'); bottomNav.classList.add('flex');
+  livePill.classList.remove('hidden');  livePill.classList.add('flex');
+  resetBtn.classList.remove('hidden');  resetBtn.classList.add('flex');
+
+  const total    = state.players.length;
+  const onCourt  = state.players.filter(p=>p.onCourt).length;
+  const inQueue  = total - onCourt;
+  const boys     = state.players.filter(p=>p.gender==='boy').length;
+  const girls    = state.players.filter(p=>p.gender==='girl').length;
+
+  // Live pill
+  document.getElementById('live-count').textContent = total;
+
+  // Nav highlight
+  ['courts','queue'].forEach(t => {
+    const btn = document.getElementById('nav-'+t);
+    if (t === state.activeTab) {
+      btn.className = 'flex flex-col items-center justify-center bg-primary text-white rounded-2xl px-5 py-2 scale-110 -translate-y-1 transition-all shadow-lg shadow-primary/30';
+    } else {
+      btn.className = 'flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-all text-slate-400';
+    }
+  });
+
+  // Courts tab
+  if (state.activeTab === 'courts') {
+    courtsPage.classList.add('active');
+    queuePage.classList.remove('active');
+    document.getElementById('stats-courts').innerHTML = `
+      <span class="text-primary font-headline text-2xl font-bold">${inQueue}</span>
+      <p class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">Waiting</p>`;
+    document.getElementById('courts-list').innerHTML = state.courts.map(courtCardHTML).join('');
+  }
+
+  // Queue tab
+  if (state.activeTab === 'queue') {
+    queuePage.classList.add('active');
+    courtsPage.classList.remove('active');
+    document.getElementById('waiting-count').textContent = inQueue;
+    const q = getQueue();
+    document.getElementById('queue-list').innerHTML = q.length
+      ? q.map((p,i)=>queueItemHTML(p,i)).join('')
+      : `<div class="text-center py-12 text-on-surface-variant/50">
+           <span class="material-symbols-outlined text-5xl block mb-3 opacity-40">celebration</span>
+           <p class="font-bold text-sm">Everyone is on a court!</p>
+         </div>`;
+  }
+}
+
+render();
+</script>
+</body>
+</html>
